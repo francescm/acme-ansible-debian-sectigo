@@ -1,0 +1,15 @@
+---
+- hosts: clients
+  vars:
+    account_name: "{{ ansible_host }}_OV_ACME_Account"
+  vars_files:
+   - "defaults/main.yaml"
+   - ["vars/{{ansible_fqdn}}.yaml", "vars/defaults.yaml"]
+  remote_user: francesco
+  become: yes
+  tasks:
+          #    - import_tasks: tasks/create_acme_account.yaml
+    - import_tasks: tasks/install_acme.yaml
+      # - import_tasks: tasks/create_cert.yaml
+      # - import_tasks: tasks/link_cert.yaml
+

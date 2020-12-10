@@ -1,0 +1,52 @@
+---
+#- name: "Create Acme Account"
+#  become: false
+#  delegate_to: 127.0.0.1
+#  command: /bin/uname -a
+#  register: uname
+#- debug:
+#    var: uname
+- name: "List all acme accounts"
+  delegate_to: 127.0.0.1
+  uri: 
+    url: "https://cert-manager.com/api/acme/v1/account?organizationId={{ organizationId }}"
+    method: GET
+    headers:
+      Content-Type: application/json
+      login: "{{ login }}"
+      password: "{{ password }}"
+      customerUri: "{{ customerUri }}"
+  register: account_list  
+- debug:
+    var: account_list.json
+- debug:
+    var: account_list.json | json_query(jmesquery)
+  vars:
+    jmesquery: '[?"name"==`{{ account_name }}`].{id: id, contacts: "contacts"} | [0]'
+- debug:
+    msg: "name is: {{ account_name }} output: <{{ account_list.json | json_query(jmesquery) }}>"
+  vars:
+    jmesquery: '[?"name"==`{{ account_name }}`].id | [0]'
+- name: "Create acme account block"
+  block:
+    - name: "Call create acme account api"
+      #      delegate_to: 127.0.0.1
+      uri:
+        url: "https://cert-manager.com/api/acme/v1/account"
+        method: POST
+        headers:
+          Content-Type: "application/json;charset=UTF-8"
+          login: "{{ login }}"
+          password: "{{ password }}"
+          customerUri: "{{ customerUri }}"
+        body: '{"name":"{{ account_name }}","acmeServer":"https://acme.sectigo.com/v2/OV","organizationId":12467}'
+        body_format: json
+        status_code: [ 201 ]  
+      register: acme_account_details    
+    - debug:
+        var: acme_account_details
+  when: ( account_list.json | json_query(jmesquery)) is falsy
+  vars:
+    value: account_list.json | json_query(jmesquery)
+    jmesquery: '[?"name"==`{{ account_name }}`].id | [0]'
+
