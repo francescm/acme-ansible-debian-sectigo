@@ -53,8 +53,10 @@
           account_id: "{{ location.split('/') | last }}"
     when: acme_account is falsy
   - name: "Extract acme account info block"
-    debug:
-      msg: "Using acme account id {{ account_id }} ..."
+    set_fact:
+      account_id: account_id
+      hmac_key_id: hmac_key_id
+      hmac_key: hmac_key
     vars:
       account_id: "{{ acme_account['id'] }}"
       hmac_key_id: "{{ acme_account['macId'] }}"
