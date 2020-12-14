@@ -17,45 +17,51 @@
     acme_account: "{{ accounts[0] }}"
     jmesquery: '[?"name"==`{{ account_name }}`]'
     #    jmesquery: '[?"name"==`{{ account_name }}`].id | [0]'
-- name: "Create acme account block"
+- name: "Expose acme accounts info"
   block:
-    - name: "Call create acme account api"
-      uri:
-        url: "https://cert-manager.com/api/acme/v1/account"
-        method: POST
-        headers:
-          Content-Type: "application/json;charset=UTF-8"
-          login: "{{ login }}"
-          password: "{{ password }}"
-          customerUri: "{{ customerUri }}"
-        body: '{"name":"{{ account_name }}","acmeServer":"https://acme.sectigo.com/v2/OV","organizationId":"{{ organizationId }}"}'
-        body_format: json
-        status_code: [ 201 ]  
-      register: acme_account_details    
-    - debug:
-        var: acme_account_details
-    - name: "Update acme account with domains"
-      uri:
-        url: "https://cert-manager.com/api/acme/v1/account/{{ account_id}}/domains"
-        method: POST
-        headers:
-          Content-Type: "application/json;charset=UTF-8"
-          login: "{{ login }}"
-          password: "{{ password }}"
-          customerUri: "{{ customerUri }}"
-          body: '{"domains":[{"name":"domain.ccmqa.com"},{"name":"sub.domain.ccmqa.com"}]}'
-        body_format: json
-        status_code: [ 201 ] 
-      vars:
-        location: "{{ acme_account_details['location'] }}"
-        account_id: "{{ location.split('/') | last }}" 
-  when: acme_account is falsy
-- name: "Extract acme account info block"
-  debug:
-    var: "Using acme account id {{ id }} ..."
+  - name: "Create acme account block"
+    block:
+      - name: "Call create acme account api"
+        uri:
+          url: "https://cert-manager.com/api/acme/v1/account"
+          method: POST
+          headers:
+            Content-Type: "application/json;charset=UTF-8"
+            login: "{{ login }}"
+            password: "{{ password }}"
+            customerUri: "{{ customerUri }}"
+          body: '{"name":"{{ account_name }}","acmeServer":"https://acme.sectigo.com/v2/OV","organizationId":"{{ organizationId }}"}'
+          body_format: json
+          status_code: [ 201 ]
+        register: acme_account_details
+      - debug:
+          var: acme_account_details
+      - name: "Update acme account with domains"
+        uri:
+          url: "https://cert-manager.com/api/acme/v1/account/{{ account_id}}/domains"
+          method: POST
+          headers:
+            Content-Type: "application/json;charset=UTF-8"
+            login: "{{ login }}"
+            password: "{{ password }}"
+            customerUri: "{{ customerUri }}"
+            body: '{"domains":[{"name":"domain.ccmqa.com"},{"name":"sub.domain.ccmqa.com"}]}'
+          body_format: json
+          status_code: [ 201 ]
+        vars:
+          location: "{{ acme_account_details['location'] }}"
+          account_id: "{{ location.split('/') | last }}"
+    when: acme_account is falsy
+  - name: "Extract acme account info block"
+    debug:
+      msg: "Using acme account id {{ account_id }} ..."
+    vars:
+      account_id: "{{ acme_account['id'] }}"
+      hmac_key_id: "{{ acme_account['macId'] }}"
+      hmac_key: "{{ acme_account['macKey'] }}"
+    when: acme_account is truthy
   vars:
-    account_id: acme_account["id"]
-    hmac_key_id: acme_account["macId"]
-    hmac_key: acme_account["macKey"]
-  when: acme_account is truthy
+    accounts: "{{ account_list.json | json_query(jmesquery) }}"
+    acme_account: "{{ accounts[0] }}"
+    jmesquery: '[?"name"==`{{ account_name }}`]'
 
