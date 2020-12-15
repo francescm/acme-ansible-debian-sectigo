@@ -67,20 +67,20 @@
           account_id: "{{ acme_account['id'] }}"
           hmac_key_id: "{{ acme_account['macId'] }}"
           hmac_key: "{{ acme_account['macKey'] }}"
-    when: acme_account is falsy
+    when: accounts is falsy
   - name: "acme account info export"
     set_fact:
       account_id: "{{ account_id }}"
       hmac_key_id: "{{ hmac_key_id }}"
       hmac_key: "{{ hmac_key }}"
     vars:
+      acme_account: "{{ accounts[0] }}"
       account_id: "{{ acme_account['id'] }}"
       hmac_key_id: "{{ acme_account['macId'] }}"
       hmac_key: "{{ acme_account['macKey'] }}"
-    when: acme_account is truthy
+    when: accounts is truthy
   vars:
     accounts: "{{ account_list.json | json_query(jmesquery) }}"
-    acme_account: "{{ accounts[0] }}"
     jmesquery: '[?"name"==`{{ account_name }}`]'
 
 
