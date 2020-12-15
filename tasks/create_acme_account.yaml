@@ -12,12 +12,7 @@
   register: account_list  
 - debug:
     msg: "checking acme account: {{ account_name }} ..."
-  vars:
-    accounts: "{{ account_list.json | json_query(jmesquery) }}"
-    acme_account: "{{ accounts[0] }}"
-    jmesquery: '[?"name"==`{{ account_name }}`]'
-    #    jmesquery: '[?"name"==`{{ account_name }}`].id | [0]'
-- name: "Expose acme accounts info"
+- name: "Expose acme accounts info (either create and export, or just export)"
   block:
   - name: "Create acme account block"
     block:
@@ -34,8 +29,6 @@
           body_format: json
           status_code: [ 201 ]
         register: acme_account_details
-      - debug:
-          var: acme_account_details
       - name: "Update acme account with domains"
         uri:
           url: "https://cert-manager.com/api/acme/v1/account/{{ account_id}}/domains"
@@ -51,19 +44,32 @@
         vars:
           location: "{{ acme_account_details['location'] }}"
           account_id: "{{ location.split('/') | last }}"
-    when: acme_account is falsy
-  - name: "Extract acme account info block"
-    set_fact:
-      account_id: "{{ account_id }}"
-      hmac_key_id: "{{ hmac_key_id }}"
-      hmac_key: "{{ hmac_key }}"
-    vars:
-      account_id: "{{ acme_account['id'] }}"
-      hmac_key_id: "{{ acme_account['macId'] }}"
-      hmac_key: "{{ acme_account['macKey'] }}"
-    when: acme_account is truthy
+      - name: "Fetch acme account info"
+        uri:
+          url: "https://cert-manager.com/api/acme/v1/account/{{ account_id}}"
+          method: GET
+          headers:
+            Content-Type: "application/json;charset=UTF-8"
+            login: "{{ login }}"
+            password: "{{ password }}"
+            customerUri: "{{ customerUri }}"
+        register: acme_account
+        vars:
+          location: "{{ acme_account_details['location'] }}"
+          account_id: "{{ location.split('/') | last }}"
+    when: acme_account is falsy # but I am creating it, so after this block acme_account is truthy
   vars:
     accounts: "{{ account_list.json | json_query(jmesquery) }}"
     acme_account: "{{ accounts[0] }}"
     jmesquery: '[?"name"==`{{ account_name }}`]'
+- name: "acme account info export"
+  set_fact:
+    account_id: "{{ account_id }}"
+    hmac_key_id: "{{ hmac_key_id }}"
+    hmac_key: "{{ hmac_key }}"
+  vars:
+    account_id: "{{ acme_account['id'] }}"
+    hmac_key_id: "{{ acme_account['macId'] }}"
+    hmac_key: "{{ acme_account['macKey'] }}"
+
 
