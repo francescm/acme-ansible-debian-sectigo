@@ -58,15 +58,15 @@
           location: "{{ acme_account_details['location'] }}"
           account_id: "{{ location.split('/') | last }}"
       - name: "acme account info export"
-          set_fact:
-            account_id: "{{ account_id }}"
-            hmac_key_id: "{{ hmac_key_id }}"
-            hmac_key: "{{ hmac_key }}"
-          vars:
-            acme_account: acme_account_registration.json
-            account_id: "{{ acme_account['id'] }}"
-            hmac_key_id: "{{ acme_account['macId'] }}"
-            hmac_key: "{{ acme_account['macKey'] }}"
+        set_fact:
+          account_id: "{{ account_id }}"
+          hmac_key_id: "{{ hmac_key_id }}"
+          hmac_key: "{{ hmac_key }}"
+        vars:
+          acme_account: acme_account_registration.json
+          account_id: "{{ acme_account['id'] }}"
+          hmac_key_id: "{{ acme_account['macId'] }}"
+          hmac_key: "{{ acme_account['macKey'] }}"
     when: acme_account is falsy
   - name: "acme account info export"
     set_fact:
