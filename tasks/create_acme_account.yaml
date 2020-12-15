@@ -38,9 +38,8 @@
             login: "{{ login }}"
             password: "{{ password }}"
             customerUri: "{{ customerUri }}"
-            body: '{"domains":[{"name":"domain.ccmqa.com"},{"name":"sub.domain.ccmqa.com"}]}'
+          body: "{'domains':{{ domains }}}"
           body_format: json
-          status_code: [ 201 ]
         vars:
           location: "{{ acme_account_details['location'] }}"
           account_id: "{{ location.split('/') | last }}"
@@ -63,7 +62,7 @@
           hmac_key_id: "{{ hmac_key_id }}"
           hmac_key: "{{ hmac_key }}"
         vars:
-          acme_account: acme_account_registration.json
+          acme_account: "{{ acme_account_registration.json }}"
           account_id: "{{ acme_account['id'] }}"
           hmac_key_id: "{{ acme_account['macId'] }}"
           hmac_key: "{{ acme_account['macKey'] }}"
@@ -82,6 +81,3 @@
   vars:
     accounts: "{{ account_list.json | json_query(jmesquery) }}"
     jmesquery: '[?"name"==`{{ account_name }}`]'
-
-
-
