@@ -53,23 +53,35 @@
             login: "{{ login }}"
             password: "{{ password }}"
             customerUri: "{{ customerUri }}"
-        register: acme_account
+        register: acme_account_registration
         vars:
           location: "{{ acme_account_details['location'] }}"
           account_id: "{{ location.split('/') | last }}"
-    when: acme_account is falsy # but I am creating it, so after this block acme_account is truthy
+      - name: "acme account info export"
+          set_fact:
+            account_id: "{{ account_id }}"
+            hmac_key_id: "{{ hmac_key_id }}"
+            hmac_key: "{{ hmac_key }}"
+          vars:
+            acme_account: acme_account_registration.json
+            account_id: "{{ acme_account['id'] }}"
+            hmac_key_id: "{{ acme_account['macId'] }}"
+            hmac_key: "{{ acme_account['macKey'] }}"
+    when: acme_account is falsy
+  - name: "acme account info export"
+    set_fact:
+      account_id: "{{ account_id }}"
+      hmac_key_id: "{{ hmac_key_id }}"
+      hmac_key: "{{ hmac_key }}"
+    vars:
+      account_id: "{{ acme_account['id'] }}"
+      hmac_key_id: "{{ acme_account['macId'] }}"
+      hmac_key: "{{ acme_account['macKey'] }}"
+    when: acme_account is truthy
   vars:
     accounts: "{{ account_list.json | json_query(jmesquery) }}"
     acme_account: "{{ accounts[0] }}"
     jmesquery: '[?"name"==`{{ account_name }}`]'
-- name: "acme account info export"
-  set_fact:
-    account_id: "{{ account_id }}"
-    hmac_key_id: "{{ hmac_key_id }}"
-    hmac_key: "{{ hmac_key }}"
-  vars:
-    account_id: "{{ acme_account['id'] }}"
-    hmac_key_id: "{{ acme_account['macId'] }}"
-    hmac_key: "{{ acme_account['macKey'] }}"
+
 
 
