@@ -4,3 +4,4 @@ master.key
 defaults/secret.yaml
 defaults/memory.yaml
 defaults/main.yaml
+.idea
