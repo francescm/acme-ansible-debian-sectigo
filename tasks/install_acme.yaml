@@ -23,7 +23,7 @@
       - -m {{ contact }}
       - --server {{ acme_server }}
       - --eab-kid {{ hmac_key_id }}
-      - --eab-hmac-key '{{ hmac_key }}'
+      - --eab-hmac-key {{ hmac_key }}
       - --agree-tos
     creates: /etc/letsencrypt/accounts/acme.sectigo.com
 - name: Manual request certificate
@@ -35,7 +35,7 @@
       - --key-type ecdsa
       - --domain {{ domains }}
       - --eab-kid {{ hmac_key_id }}
-      - --eab-hmac-key '{{ hmac_key }}'
+      - --eab-hmac-key {{ hmac_key }}
       - --apache
       - --agree-tos
       - -n
