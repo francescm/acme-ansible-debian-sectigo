@@ -18,11 +18,11 @@
     state: link  
 - name: Register acme account  
   command:
-    cmd: "/snap/bin/certbot register -m {{ contact }} --server {{ acme_server }} --eab-kid {{ hmac_key_id }} --eab-hmac-key '{{ hmac_key }}' --agree-tos"
+    cmd: "/snap/bin/certbot register -m {{ contact }} --server {{ acme_server }} --eab-kid {{ hmac_key_id }} --eab-hmac-key={{ hmac_key }} --agree-tos"
     creates: /etc/letsencrypt/accounts/acme.sectigo.com
 - name: Manual request certificate
   command:
-    cmd: "/snap/bin/certbot certonly -m {{ contact }} --server {{ acme_server }} --key-type ecdsa --domain {{ domains }} --eab-kid {{ hmac_key_id }} --eab-hmac-key '{{ hmac_key }}' --apache --agree-tos -n"
+    cmd: "/snap/bin/certbot certonly -m {{ contact }} --server {{ acme_server }} --key-type ecdsa --domain {{ domains }} --eab-kid {{ hmac_key_id }} --eab-hmac-key={{ hmac_key }} --apache --agree-tos -n"
     creates: "/etc/letsencrypt/archive/{{ ansible_fqdn }}"
   vars:
     domains: "{{ ( alt_names + [ ansible_fqdn ] ) | reverse | join(',') }}"
