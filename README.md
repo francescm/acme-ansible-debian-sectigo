@@ -20,6 +20,12 @@ invoke ansible with extra vars at runtime:
 
     ansible-playbook [...all as above...] --extra-vars '{"alt_names":["box01.example.org","box02.example.org"]}'
     
+## Add debug to the script
+
+Just append a:
+  
+    [...ansible-playbook-command-with-switches...] --extra-vars "debug=true"
+    
 ## Explore and debug
 
 Get latest Sectigo API handbook; on mid December 2020 it was a huge html doc titled: certmgr-api-doc-20.11.html

@@ -1,0 +1,42 @@
+---
+- name: "Domain list print"
+  ansible.builtin.debug:
+    msg: "Working on domain {{ domain }}"
+  when: (debug is defined) and debug  
+- name: "check domain info"
+  uri:
+    url: "https://cert-manager.com/api/domain/v1?name={{ domain['name'] }}"
+    method: GET
+    headers:
+      Content-Type: "application/json;charset=UTF-8"
+      login: "{{ login }}"
+      password: "{{ password }}"
+      customerUri: "{{ customerUri }}"
+  register: domain_info
+- name: "print domain info"
+  ansible.builtin.debug:
+    msg: "{{ domain_info.json | json_query(domain_query) }}"
+  vars:  
+    domain_query: '[?"name"==`{{ domain_name }}`]' 
+    domain_name: "{{ domain['name'] }}"
+  when: (debug is defined) and debug  
+- name: "create domain block"
+  block:  
+  - name: "print create domain"
+    ansible.builtin.debug:
+      msg: "Need to create missing domain: {{ domain_name }}"
+  - name: "create domain"
+    uri:
+      url: "https://cert-manager.com/api/domain/v1"
+      method: POST
+      headers:
+        Content-Type: "application/json;charset=UTF-8"
+        login: "{{ login }}"
+        password: "{{ password }}"
+        customerUri: "{{ customerUri }}"
+      body: '{"name":"{{ domain_name }}","description":"Domain created via REST API","active":true,"delegations":[{"orgId":"{{ organizationId }}","certTypes":["CodeSign","SSL","SMIME"]}]}'
+      body_format: json
+      status_code: [ 201 ]  
+  when: domain_info.json|length == 0
+  vars:
+    domain_name: "{{ domain['name'] }}"

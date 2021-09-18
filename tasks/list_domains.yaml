@@ -1,0 +1,10 @@
+---
+- name: "Domain list print"
+  ansible.builtin.debug:
+    msg: "{{ domains }}"
+  when: (debug is defined) and debug
+- name: "check domain info"
+  include_tasks: "tasks/check_domain.yaml"
+  loop: "{{ domains }}"
+  loop_control:
+    loop_var: domain
