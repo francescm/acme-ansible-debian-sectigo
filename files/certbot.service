@@ -4,5 +4,5 @@ Documentation=file:///usr/share/doc/python-certbot-doc/html/index.html
 Documentation=https://letsencrypt.readthedocs.io/en/latest/
 [Service]
 Type=oneshot
-ExecStart=/snap/bin/certbot -q renew --post-hook "/usr/bin/setfacl -m g:ssl-cert:r /etc/letsencrypt/archive/*/privkey*.pem"
+ExecStart=/usr/bin/certbot -q renew --post-hook "/usr/bin/setfacl -m g:ssl-cert:r /etc/letsencrypt/archive/*/privkey*.pem"
 PrivateTmp=true

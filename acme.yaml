@@ -1,15 +1,15 @@
 ---
 - hosts: clients
-  vars:
-    account_name: "{{ ansible_host }}_OV_ACME_Account"
+  gather_facts: yes
   vars_files:
    - "defaults/secret.yaml"
    - "defaults/plain.yaml"
-   - ["vars/{{ansible_fqdn}}.yaml", "vars/defaults.yaml"]
+   - ["vars/{{ansible_facts['fqdn']}}.yaml", "vars/defaults.yaml"]
   remote_user: francesco
   become: yes
   tasks:
     #    - import_tasks: tasks/list_domains.yaml
       #    - import_tasks: tasks/create_acme_account.yaml
-    - import_tasks: tasks/install_acme.yaml
+    #- import_tasks: tasks/install_acme.yaml
+    - import_tasks: tasks/install_certbot.yaml
 

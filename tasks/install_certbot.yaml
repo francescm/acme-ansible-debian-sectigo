@@ -1,0 +1,72 @@
+---
+- name: Install certbot
+  become: true
+  apt:
+    name: ['certbot','python3-certbot-apache']
+- name: Register acme account  
+  command:
+    cmd: "/usr/bin/certbot register -m {{ contact }} --server {{ acme_server }} --eab-kid {{ hmac_key_id }} --eab-hmac-key={{ hmac_key }} --agree-tos"
+    creates: /etc/letsencrypt/accounts/acme-v02.harica.gr
+- name: Manual request certificate
+  command:
+    cmd: "/usr/bin/certbot certonly -m {{ contact }} --server {{ acme_server }} --key-type ecdsa --domain {{ domains }} --eab-kid {{ hmac_key_id }} --eab-hmac-key={{ hmac_key }} --apache --agree-tos -n"
+    creates: "/etc/letsencrypt/archive/{{ ansible_fqdn }}"
+  vars:
+    domains: "{{ ( alt_names + [ ansible_fqdn ] ) | reverse | join(',') }}"
+- debug:
+    var: domains
+  vars:
+    domains: "{{ ( alt_names + [ ansible_fqdn ] ) | reverse | join(',') }}"
+- name: "Copy systemd service files"
+  copy:
+    src: "files/certbot.service"
+    dest: "/etc/systemd/system/certbot.service"
+    mode: "0644"
+    owner: "root"
+    group: "root"
+- name: "Copy systemd timer files"
+  copy:
+    src: "files/certbot.timer"
+    dest: "/etc/systemd/system/certbot.timer"
+    mode: "0644"
+    owner: "root"
+    group: "root"
+- name: "enable certbot.timer and restart"
+  systemd:
+    name: certbot.timer
+    enabled: yes
+    state: started
+- name: Change key ownership, group and permissions
+  file:
+    path: "/etc/letsencrypt/live/{{ ansible_fqdn }}/privkey.pem"
+    group: Debian-exim
+    mode: '0640'
+- name: Change key path ownership, group and permissions
+  file:
+    path: "{{ item }}"
+    group: Debian-exim
+    mode: '0750'
+  with_items:
+    - /etc/letsencrypt/live
+    - "/etc/letsencrypt/live/{{ ansible_fqdn }}"
+    - /etc/letsencrypt/archive
+    - "/etc/letsencrypt/archive/{{ ansible_fqdn }}"
+- name: "Grant group ssl-cert read access to key"
+  ansible.posix.acl:
+    path: "/etc/letsencrypt/live/{{ ansible_fqdn }}/privkey.pem"
+    entity: ssl-cert
+    etype: group
+    permissions: r
+    state: present
+- name: "Grant group ssl-cert read access to key path"
+  ansible.posix.acl:
+    path: "{{ item }}"
+    entity: ssl-cert
+    etype: group
+    permissions: x
+    state: present
+  with_items:
+    - /etc/letsencrypt/live
+    - "/etc/letsencrypt/live/{{ ansible_fqdn }}"
+    - /etc/letsencrypt/archive
+    - "/etc/letsencrypt/archive/{{ ansible_fqdn }}"
