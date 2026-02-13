@@ -15,8 +15,7 @@ Invoke the task with:
 
 Given a host whose fqdn is `host.example.org` the certificate dn would be `host.example.org`.
 
-In order to add more alternative names, either add a file in `./vars/` (check the `box.example.org.yaml` example) or
-invoke ansible with extra vars at runtime:
+In order to add more alternative names, invoke ansible with extra vars at runtime:
 
     ansible-playbook [...all as above...] --extra-vars '{"alt_names":["box01.example.org","box02.example.org"]}'
     

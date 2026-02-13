@@ -4,7 +4,7 @@
   vars_files:
    - "defaults/secret.yaml"
    - "defaults/plain.yaml"
-   - ["vars/{{ansible_facts['fqdn']}}.yaml", "vars/defaults.yaml"]
+   - "vars/defaults.yaml"
   remote_user: francesco
   become: yes
   tasks:
