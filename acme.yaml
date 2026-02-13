@@ -9,6 +9,7 @@
   remote_user: francesco
   become: yes
   tasks:
-    - import_tasks: tasks/create_acme_account.yaml
+    #    - import_tasks: tasks/list_domains.yaml
+      #    - import_tasks: tasks/create_acme_account.yaml
     - import_tasks: tasks/install_acme.yaml
 

@@ -19,7 +19,7 @@
 - name: Register acme account  
   command:
     cmd: "/snap/bin/certbot register -m {{ contact }} --server {{ acme_server }} --eab-kid {{ hmac_key_id }} --eab-hmac-key={{ hmac_key }} --agree-tos"
-    creates: /etc/letsencrypt/accounts/acme.sectigo.com
+    creates: /etc/letsencrypt/accounts/acme-v02.harica.gr
 - name: Manual request certificate
   command:
     cmd: "/snap/bin/certbot certonly -m {{ contact }} --server {{ acme_server }} --key-type ecdsa --domain {{ domains }} --eab-kid {{ hmac_key_id }} --eab-hmac-key={{ hmac_key }} --apache --agree-tos -n"

@@ -1,0 +1,23 @@
+---
+- name: "Domain list print"
+  ansible.builtin.debug:
+    msg: "{{ domains }}"
+  when: (debug is defined) and debug
+- name: "list domains"
+  uri:
+    url: "https://cert-manager.com/api/domain/v1"
+    method: GET
+    headers:
+      Content-Type: "application/json;charset=UTF-8"
+      login: "{{ login }}"
+      password: "{{ password }}"
+      customerUri: "{{ customerUri }}"
+  register: domain_list
+- name: "domain list export"
+  set_fact:
+    domain_list: "{{ domain_list.json }}"
+- name: "check domain info"
+  include_tasks: "tasks/check_domain.yaml"
+  loop: "{{ domains }}"
+  loop_control:
+    loop_var: domain
