@@ -1,2 +1,3 @@
 ---
 alt_names: []
+fqdn: "{{ ansible_facts['fqdn'] }}"

@@ -10,13 +10,13 @@
 - name: Manual request certificate
   command:
     cmd: "/usr/bin/certbot certonly -m {{ contact }} --server {{ acme_server }} --key-type ecdsa --domain {{ domains }} --eab-kid {{ hmac_key_id }} --eab-hmac-key={{ hmac_key }} --apache --agree-tos -n"
-    creates: "/etc/letsencrypt/archive/{{ ansible_fqdn }}"
+    creates: "/etc/letsencrypt/archive/{{ ansible_facts['fqdn'] }}"
   vars:
-    domains: "{{ ( alt_names + [ ansible_fqdn ] ) | reverse | join(',') }}"
+    domains: "{{ ( alt_names + [ ansible_facts['fqdn'] ] ) | reverse | join(',') }}"
 - debug:
     var: domains
   vars:
-    domains: "{{ ( alt_names + [ ansible_fqdn ] ) | reverse | join(',') }}"
+    domains: "{{ ( alt_names + [ ansible_facts['fqdn'] ] ) | reverse | join(',') }}"
 - name: "Copy systemd service files"
   copy:
     src: "files/certbot.service"
@@ -38,7 +38,7 @@
     state: started
 - name: Change key ownership, group and permissions
   file:
-    path: "/etc/letsencrypt/live/{{ ansible_fqdn }}/privkey.pem"
+    path: "/etc/letsencrypt/live/{{ fqdn }}/privkey.pem"
     group: Debian-exim
     mode: '0640'
 - name: Change key path ownership, group and permissions
@@ -48,12 +48,12 @@
     mode: '0750'
   with_items:
     - /etc/letsencrypt/live
-    - "/etc/letsencrypt/live/{{ ansible_fqdn }}"
+    - "/etc/letsencrypt/live/{{ fqdn }}"
     - /etc/letsencrypt/archive
-    - "/etc/letsencrypt/archive/{{ ansible_fqdn }}"
+    - "/etc/letsencrypt/archive/{{ fqdn }}"
 - name: "Grant group ssl-cert read access to key"
   ansible.posix.acl:
-    path: "/etc/letsencrypt/live/{{ ansible_fqdn }}/privkey.pem"
+    path: "/etc/letsencrypt/live/{{ fqdn }}/privkey.pem"
     entity: ssl-cert
     etype: group
     permissions: r
@@ -67,6 +67,6 @@
     state: present
   with_items:
     - /etc/letsencrypt/live
-    - "/etc/letsencrypt/live/{{ ansible_fqdn }}"
+    - "/etc/letsencrypt/live/{{ fqdn }}"
     - /etc/letsencrypt/archive
-    - "/etc/letsencrypt/archive/{{ ansible_fqdn }}"
+    - "/etc/letsencrypt/archive/{{ fqdn }}"
